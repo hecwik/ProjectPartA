@@ -4,7 +4,7 @@ namespace ProjectPartA_A1
 {
     class Program
     {
-        struct Article
+        public struct Article
         {
             public string Name;
             public decimal Price;
@@ -19,82 +19,225 @@ namespace ProjectPartA_A1
 
         static void Main(string[] args)
         {
-            ShoppingMenu();
             ReadArticles();
-            PrintReciept();
-        }
-
-        private static void ReadArticles()
-        {
-            bool amountArticlesEntered = false;
-            while (amountArticlesEntered == false)
-            {
-                Console.Write("How many articles would you like to buy (between 1-10)?: ");
-
-                // tryparse on console.readline input
-                if (int.TryParse(Console.ReadLine(), out int amountOfArticles))
-                {
-                    if (amountOfArticles > 0 && amountOfArticles <= 10)
-                    {
-                        Console.WriteLine($"You want to purchase {amountOfArticles}.\n");
-                        // set boolean variable to true since a valid number of articles has been entered
-                        amountArticlesEntered = true;
-                    }
-
-                    else if (amountOfArticles < 1)
-                    {
-                        Console.WriteLine($"No articles entered, please enter an article.\n");
-                        amountArticlesEntered = false;
-                    }
-
-                    else if (amountOfArticles > 10)
-                    {
-                        Console.WriteLine($"{amountOfArticles} is too many articles. Maximum number of articles is 10.\n");
-                        amountArticlesEntered = false;
-                    }
-                }
-
-                // if tryparse fails, display message
-                else
-                {
-                    Console.WriteLine("Wrong input - please enter a number between 1-10.");
-                    amountArticlesEntered = false;
-                }
-            }
-
-
-
-
-        }
-        private static void PrintReceipt()
-        {
-
-
-
-            //Your code to print out a receipt
-
+            AddArticle();
+            PrintReceipt(articles);
         }
 
         public static void ShoppingMenu()
         {
+            Console.Clear();
             Console.WriteLine("== Welcome to Project Part A! ==");
             Console.WriteLine("Let us print a receipt!\n");
         }
-        public static int CountArticles()
+
+        private static void ReadArticles()
         {
-            foreach (var item in articles)
+            try
             {
-                if(item.Name != null)
-                nrArticles++;
+                // invoke shopping menu method's writeline rows
+                ShoppingMenu();
+
+                // initiate bool variable for while-loop control
+                bool articlesEntered = false;
+                while (articlesEntered == false)
+                {
+                    Console.Write("\nHow many articles would you like to buy (between 1-10)?: ");
+
+                    // tryparse on console.readline input
+                    if (int.TryParse(Console.ReadLine(), out int amountOfArticles))
+                    {
+                        // check if input is between 0 and 11
+                        if (amountOfArticles > 0 && amountOfArticles <= 10)
+                        {
+                            // set nrArticles to the input amount of articles selected by the user
+                            nrArticles = amountOfArticles;
+
+                            // checks how many articles, if there are more than one, go to else and print "articles" instead of article
+                            if (nrArticles == 1)
+                            {
+                                Console.WriteLine($"\nYou want to purchase {nrArticles} article.\n");
+                            }
+
+                            else
+                            {
+                                Console.WriteLine($"\nYou want to purchase {nrArticles} articles.\n");
+                            }
+
+                            // set boolean variable to true since a valid number of articles has been entered, exit while loop
+                            articlesEntered = true;
+                        }
+
+                        else if (amountOfArticles > 10)
+                        {
+                            Console.WriteLine($"\n{amountOfArticles} are too many articles. Maximum number of articles is 10.\n");
+                            articlesEntered = false;
+                        }
+                        else if (amountOfArticles <= 0)
+                        {
+                            Console.WriteLine($"\nYou have to add an article.\n");
+                            articlesEntered = false;
+                        }
+                    }
+
+                    // if tryparse fails, display message
+                    else
+                    {
+                        Console.WriteLine("\nWrong input - please enter a number between 1-10.");
+                        articlesEntered = false;
+                    }
+                }
             }
-            return nrArticles;
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
+            }
+        }
+        // method for adding articles
+        static void AddArticle()
+        {
+            bool adding = false;
+            try
+            {
+
+                while (adding == false)
+                {
+                    // uninitialized string array used for splitting string
+                    string[] articleArray;
+                    
+                    // for-loop that iterates through the number of articles asked for in ReadArticle() method
+                    for (int i = 1; i <= nrArticles; i++)
+                    {
+                        Console.WriteLine($"Please enter an article and price for article #{i} in the format 'Apple 2,25'");
+
+                        // wait for user input with console.readline
+                        string articleInput = Console.ReadLine();
+
+                        // check if input string contains a white space
+                        if (articleInput.Contains(" "))
+                        {
+                            // add articleInput to the string[] array using split method with white space as their separator
+                            articleArray = articleInput.Split(" ");
+
+                            // check if the name is not empty or white space, and if price input is not empty
+                            if (articleArray[0] != " " && articleArray[0] != string.Empty && articleArray[1] != string.Empty)
+                            {
+                                // check if input string is shorter than 20 characters and longer than 0
+                                if (articleInput.Length > 1 || articleInput.Length <= _maxArticleNameLength)
+                                {
+                                    // tryparse the decimal value of the second string[] element
+                                    if (decimal.TryParse(articleArray[1], out decimal decimalResult))
+                                    {
+                                        // create new instance of Article
+                                        Article myArticle = new Article();
+
+                                        myArticle.Name = articleArray[0];
+                                        articles[i].Name = myArticle.Name;
+
+                                        // assign tryparse out-variable to Price of Article
+                                        myArticle.Price = decimalResult;
+
+                                        // add Price of Article to array element's Price
+                                        articles[i].Price = myArticle.Price;
+
+                                        Console.WriteLine($"\nYou have added {articles[i].Name} {articles[i].Price:C} to the shopping list.\n");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("\nError! The price has to use a decimal point as in '2,25'.\n");
+                                        i--;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"\nName of article is too long! Maximum {_maxArticleNameLength} characters allowed.");
+                                    i--;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Article name or price was not entered, please try again.");
+                                i--;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error! There must be a space between name and price.");
+                            i--;
+                        }
+                    }
+                    // set adding to true and exit the while loop
+                    adding = true;
+                }
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
+            }
+            adding = false;
         }
 
-        public static string AddArticle(Article[] articles, Article article)
+        // method that prints elements in the article[] articles array
+        private static void PrintReceipt(Article[] articles)
         {
-            for (int i = 0; i < articles.Length; i++)
+            
+            try
             {
+                Console.Clear();
+                int countArticles = 0;
+                decimal totalPrice = 0;
 
+                // counter for the number of articles bought
+                foreach (var item in articles)
+                {
+                    if (item.Name != null)
+                    {
+                        countArticles++;
+                    }
+                }
+
+                // checks if shopping list contains any articles
+                if (countArticles > 0)
+                {
+
+                    Console.WriteLine("\n\t==YOUR RECEIPT==");
+                    Console.WriteLine($"\nDate of purchase: {DateTime.Now}");
+                    Console.WriteLine($"\nNumber of items purchased: {countArticles}");
+                    Console.WriteLine($"\n{"#",-2} {"Name",-10} {"Price"}");
+
+                    // add the prices of the items in the array together
+                    foreach (var item in articles)
+                    {
+                        totalPrice += item.Price;
+                    }
+
+                    // counter for the number of objects in the receipt
+                    int countReceipt = 0;
+
+                    for (int i = 0; i < articles.Length; i++)
+                    {
+                        if (articles[i].Name != null)
+                        {
+                            countReceipt++;
+                            Console.WriteLine($"{countReceipt,-2} {articles[i].Name,-10} {articles[i].Price:C}");
+                        }
+                    }
+
+                    Console.WriteLine($"\nTotal purchase: {totalPrice:C}");
+
+                    // calculate included VAT in price
+                    Console.WriteLine($"\nIncludes VAT: {totalPrice * _vat:C}");
+                    Console.WriteLine("\nREMEMBER TO ALWAYS KEEP YOUR RECEIPT :)");
+
+                }
+                else
+                {
+                    Console.WriteLine("The shopping list is empty!");
+                }
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
             }
         }
     }
